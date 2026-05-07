@@ -17,6 +17,7 @@ namespace DandyDino.Modulate.Bootstrap
         
         private const string NuGetForUnityKey = "com.github-glitchenzo.nugetforunity";
         private const string NuGetForUnityUrl = "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity#v4.4.0";
+        private const string SelfPackageName = "com.dandydino.modulateinstaller";
 
         private const string R3NuGetId      = "R3";
         private const string R3NuGetVersion = "1.3.0";
@@ -152,11 +153,38 @@ namespace DandyDino.Modulate.Bootstrap
 
                 SaveManifest(manifest);
                 Debug.Log($"{LogPrefix} manifest.json updated. Resolving packages…");
+                
+                UninstallSelf();
                 Client.Resolve();
             }
             catch (System.Exception ex)
             {
                 Debug.LogError($"{LogPrefix} Failed to install remaining dependencies: {ex}");
+            }
+        }
+        
+        public static void UninstallSelf()
+        {
+            try
+            {
+                Debug.Log($"{LogPrefix} Removing installer package ({SelfPackageName})…");
+
+                // Belt-and-suspenders: also strip it from manifest.json directly, in case
+                // Client.Remove gets interrupted by the assembly unloading mid-call.
+                var manifest = LoadManifest();
+                if (manifest?["dependencies"] is JObject deps && deps[SelfPackageName] != null)
+                {
+                    deps.Remove(SelfPackageName);
+                    SaveManifest(manifest);
+                }
+
+                // Ask UPM to remove it properly. This kicks off a resolve which will
+                // unload this very assembly — anything after this call may not run.
+                Client.Remove(SelfPackageName);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"{LogPrefix} Failed to uninstall self: {ex}");
             }
         }
 

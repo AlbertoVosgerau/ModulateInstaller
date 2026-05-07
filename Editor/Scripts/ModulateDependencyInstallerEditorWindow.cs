@@ -7,20 +7,17 @@ namespace DandyDino.Modulate
 {
     public class ModulateDependencyInstallerEditorWindow : EditorWindow
     {
-        [MenuItem("DandyDinoModulate/Debug/List Assemblies")]
-        private static void ListAssemblies()
+        [InitializeOnLoadMethod]
+        public static void InitializeOnLoadMethod()
         {
-            var names = System.AppDomain.CurrentDomain.GetAssemblies()
-                .Select(a => a.GetName().Name)
-                .OrderBy(n => n);
-            foreach (var n in names) Debug.Log(n);
+            ShowWindow();
         }
         
         // THIS CLASS ONLY CALLS MODULATE DEPENDENCY, DOES NOT PERFORM ANYTHING, ONLY CALLS
         // ORDER: NUGET, THEN INSTALL R3 AUTOMATICALLY IF NOT INSTALLED. FINALLY, INSTALL EVERYTHING ELSE.
         private static ModulateDependencyInstallerEditorWindow _window;
 
-        [MenuItem("DandyDinoModulate/ModulateDependencyInstallerEditorWindow")]
+        [MenuItem("Modulate! Installer/Install Modulate! Dependencies")]
         public static void ShowWindow()
         {
             _window = GetWindow<ModulateDependencyInstallerEditorWindow>();
