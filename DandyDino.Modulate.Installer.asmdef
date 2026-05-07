@@ -1,0 +1,22 @@
+{
+    "name": "DandyDino.Modulate.Installer",
+    "rootNamespace": "DandyDino.Modulate",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "",
+            "define": ""
+        }
+    ],
+    "noEngineReferences": false
+}

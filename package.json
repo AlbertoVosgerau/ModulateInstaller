@@ -1,0 +1,21 @@
+{
+  "name": "com.dandydino.modulateinstaller",
+  "version": "0.4.2",
+  "displayName": "Modulate! Installer",
+  "description": "Installer for Modulate!. This package will setup all the dependencies and import the actual package automatically in a few easy steps.",
+  "unity": "6000.4",
+  "unityRelease": "4f1",
+  "documentationUrl": "https://github.com/AlbertoVosgerau/Modulate",
+  "changelogUrl": "https://github.com/AlbertoVosgerau/Modulate/blob/main/CHANGELOG.md",
+  "license": "WTFPL",
+  "licenseUrl": "https://github.com/AlbertoVosgerau/Modulate/blob/main/LICENSE.md",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "keywords": ["unity", "modules", "architecture"],
+  "author": {
+    "name": "Alberto Vosgerau Neto",
+    "email": "rex3dbr@gmail.com",
+    "url": "https://albertovosgerau.myportfolio.com/"
+  }
+}
