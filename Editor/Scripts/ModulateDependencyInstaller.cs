@@ -29,7 +29,7 @@ namespace DandyDino.Modulate.Bootstrap
             { "com.dandydino.elements",    "https://github.com/AlbertoVosgerau/DDElements.git#0.2.0" },
             { "com.cysharp.unitask",       "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.10" },
             { "com.cysharp.r3",            "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity#1.3.0" },
-            { "com.dandydino.modulate",    "https://github.com/AlbertoVosgerau/Modulate.git#0.4.2" },
+            { "com.dandydino.modulate",    "https://github.com/AlbertoVosgerau/Modulate.git#0.4.3" },
         };
         
         public static bool IsModulateInstalled()
