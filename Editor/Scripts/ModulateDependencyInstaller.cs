@@ -91,11 +91,10 @@ namespace DandyDino.Modulate.Bootstrap
                     Debug.Log($"{LogPrefix} NuGetForUnity already in manifest.");
                     return;
                 }
-
                 deps[NuGetForUnityKey] = NuGetForUnityUrl;
                 SaveManifest(manifest);
                 Debug.Log($"{LogPrefix} Added NuGetForUnity. Resolving…");
-                ModulateDependencyInstallerEditorWindow.CloseWindow();
+                
                 Client.Resolve();
             }
             catch (Exception e)
@@ -167,7 +166,7 @@ namespace DandyDino.Modulate.Bootstrap
 
                 SaveManifest(manifest);
                 Debug.Log($"{LogPrefix} manifest.json updated. Resolving packages…");
-                
+                ModulateDependencyInstallerEditorWindow.CloseWindow();
                 UninstallSelf();
                 Client.Resolve();
             }
