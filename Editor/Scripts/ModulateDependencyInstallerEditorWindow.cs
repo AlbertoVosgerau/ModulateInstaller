@@ -28,6 +28,9 @@ namespace DandyDino.Modulate
         private static GUIStyle _flatButtonStyle;
         
         private static readonly string HAS_LAUNCHED = "ModulateInstallerLaunched";
+        
+        private bool _r3InstallQueued;
+        private bool _selfUninstallTriggered;
 
         [MenuItem("Modulate! Installer/Install Modulate! Dependencies")]
         public static void ShowWindow()
@@ -41,10 +44,22 @@ namespace DandyDino.Modulate
             
         }
 
+        private void OnEnable()
+        {
+            // Reload banner — static fields can be reset by domain reload while the window persists
+            if (_banner == null)
+            {
+                _banner = Resources.Load<Texture>("ModulateInstaller/Banner");
+            }
+        }
+
         private void OnGUI()
         {
-            Rect rect = GUILayoutUtility.GetRect(0, 100, GUILayout.ExpandWidth(true));
-            GUI.DrawTexture(rect, _banner, ScaleMode.ScaleAndCrop);
+            if (_banner != null)
+            {
+                Rect rect = GUILayoutUtility.GetRect(0, 100, GUILayout.ExpandWidth(true));
+                GUI.DrawTexture(rect, _banner, ScaleMode.ScaleAndCrop);
+            }
             
             GUILayout.Space(10);
             
@@ -54,8 +69,16 @@ namespace DandyDino.Modulate
 
             if (ModulateDependencyInstaller.IsModulateInstalled())
             {
-                Close();
-                ModulateDependencyInstaller.UninstallSelf();
+                if (!_selfUninstallTriggered)
+                {
+                    _selfUninstallTriggered = true;
+                    // Defer to next editor tick so we don't mutate state mid-OnGUI
+                    EditorApplication.delayCall += () =>
+                    {
+                        ModulateDependencyInstaller.UninstallSelf();
+                    };
+                }
+                EditorGUILayout.HelpBox("Modulate is already installed. Removing installer…", MessageType.Info);
                 return;
             }
             
@@ -112,8 +135,12 @@ namespace DandyDino.Modulate
                 EditorGUILayout.LabelField("Installing R3 from NuGet…");
                 EditorGUILayout.EndHorizontal();
 
-                // Kick off automatically once we land here.
-                EditorApplication.delayCall += ModulateDependencyInstaller.InstallR3FromNuGet;
+                // Kick off automatically once we land here — but only ONCE.
+                if (!_r3InstallQueued)
+                {
+                    _r3InstallQueued = true;
+                    EditorApplication.delayCall += ModulateDependencyInstaller.InstallR3FromNuGet;
+                }
                 return;
             }
 
@@ -161,7 +188,11 @@ namespace DandyDino.Modulate
 
         public static void CloseWindow()
         {
-            ((EditorWindow)_window).Close();
+            if (_window != null)
+            {
+                _window.Close();
+                _window = null;
+            }
         }
 
         private void OnInspectorUpdate()

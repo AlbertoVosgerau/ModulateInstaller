@@ -158,6 +158,13 @@ namespace DandyDino.Modulate.Bootstrap
                     }
                 }
 
+                if (deps[SelfPackageName] != null)
+                {
+                    deps.Remove(SelfPackageName);
+                    changed = true;
+                    Debug.Log($"{LogPrefix} Removed installer package: {SelfPackageName}");
+                }
+
                 if (!changed)
                 {
                     Debug.Log($"{LogPrefix} All remaining dependencies already present.");
@@ -166,8 +173,8 @@ namespace DandyDino.Modulate.Bootstrap
 
                 SaveManifest(manifest);
                 Debug.Log($"{LogPrefix} manifest.json updated. Resolving packages…");
+
                 ModulateDependencyInstallerEditorWindow.CloseWindow();
-                UninstallSelf();
                 Client.Resolve();
             }
             catch (System.Exception e)
@@ -180,20 +187,16 @@ namespace DandyDino.Modulate.Bootstrap
         {
             try
             {
+                ModulateDependencyInstallerEditorWindow.CloseWindow();
                 Debug.Log($"{LogPrefix} Removing installer package ({SelfPackageName})…");
 
-                // Belt-and-suspenders: also strip it from manifest.json directly, in case
-                // Client.Remove gets interrupted by the assembly unloading mid-call.
                 JObject manifest = LoadManifest();
                 if (manifest?["dependencies"] is JObject deps && deps[SelfPackageName] != null)
                 {
                     deps.Remove(SelfPackageName);
                     SaveManifest(manifest);
+                    Client.Resolve();
                 }
-
-                // Ask UPM to remove it properly. This kicks off a resolve which will
-                // unload this very assembly — anything after this call may not run.
-                Client.Remove(SelfPackageName);
             }
             catch (System.Exception e)
             {
