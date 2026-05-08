@@ -10,6 +10,14 @@ namespace DandyDino.Modulate
         [InitializeOnLoadMethod]
         public static void InitializeOnLoadMethod()
         {
+            bool hasLaunched = EditorPrefs.GetBool(HAS_LAUNCHED);
+            
+            if (hasLaunched)
+            {
+                return;
+            }
+            EditorPrefs.SetBool(HAS_LAUNCHED, true);
+            
             ShowWindow();
         }
         
@@ -25,15 +33,6 @@ namespace DandyDino.Modulate
         [MenuItem("Modulate! Installer/Install Modulate! Dependencies")]
         public static void ShowWindow()
         {
-            bool hasLaunched = EditorPrefs.GetBool(HAS_LAUNCHED);
-            
-            if (hasLaunched)
-            {
-                return;
-            }
-            
-            EditorPrefs.SetBool(HAS_LAUNCHED, true);
-            
             _window = GetWindow<ModulateDependencyInstallerEditorWindow>();
             _window.titleContent = new GUIContent("Install Modulate!");
             _window.minSize = new Vector2(600, 400);
@@ -161,7 +160,7 @@ namespace DandyDino.Modulate
             }
         }
 
-        public static void Close()
+        public static void CloseWindow()
         {
             ((EditorWindow)_window).Close();
         }

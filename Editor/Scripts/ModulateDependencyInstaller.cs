@@ -95,7 +95,7 @@ namespace DandyDino.Modulate.Bootstrap
                 deps[NuGetForUnityKey] = NuGetForUnityUrl;
                 SaveManifest(manifest);
                 Debug.Log($"{LogPrefix} Added NuGetForUnity. Resolving…");
-                ModulateDependencyInstallerEditorWindow.Close();
+                ModulateDependencyInstallerEditorWindow.CloseWindow();
                 Client.Resolve();
             }
             catch (Exception e)
