@@ -185,7 +185,7 @@ namespace DandyDino.Modulate.Bootstrap
 
                 // Belt-and-suspenders: also strip it from manifest.json directly, in case
                 // Client.Remove gets interrupted by the assembly unloading mid-call.
-                var manifest = LoadManifest();
+                JObject manifest = LoadManifest();
                 if (manifest?["dependencies"] is JObject deps && deps[SelfPackageName] != null)
                 {
                     deps.Remove(SelfPackageName);

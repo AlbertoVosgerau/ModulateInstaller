@@ -19,16 +19,28 @@ namespace DandyDino.Modulate
         private static Texture2D _flatButtonTex;
         private static Texture2D _flatButtonHoverTex;
         private static GUIStyle _flatButtonStyle;
+        
+        private static readonly string HAS_LAUNCHED = "ModulateInstallerLaunched";
 
         [MenuItem("Modulate! Installer/Install Modulate! Dependencies")]
         public static void ShowWindow()
         {
+            bool hasLaunched = EditorPrefs.GetBool(HAS_LAUNCHED);
+            
+            if (hasLaunched)
+            {
+                return;
+            }
+            
+            EditorPrefs.SetBool(HAS_LAUNCHED, true);
+            
             _window = GetWindow<ModulateDependencyInstallerEditorWindow>();
             _window.titleContent = new GUIContent("Install Modulate!");
             _window.minSize = new Vector2(600, 400);
             
             _banner = Resources.Load<Texture>("ModulateInstaller/Banner");
             _window.Show();
+            
         }
 
         private void OnGUI()
