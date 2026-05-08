@@ -18,21 +18,27 @@ namespace DandyDino.Modulate.Bootstrap
         private const string NuGetForUnityKey = "com.github-glitchenzo.nugetforunity";
         private const string NuGetForUnityUrl = "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity#v4.4.0";
         private const string SelfPackageName = "com.dandydino.modulateinstaller";
+        private const string ModulatePackageName = "com.dandydino.modulate";
 
         private const string R3NuGetId      = "R3";
         private const string R3NuGetVersion = "1.3.0";
-
-
-        private static readonly Dictionary<string, string> RemainingDependencies =
-            new Dictionary<string, string>
-            {
-                { "com.gustavopsantos.reflex", "https://github.com/gustavopsantos/reflex.git?path=/Assets/Reflex/#14.3.0" },
-                { "com.dandydino.elements",    "https://github.com/AlbertoVosgerau/DDElements.git#0.2.0" },
-                { "com.cysharp.unitask",       "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.10" },
-                { "com.cysharp.r3",            "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity#1.3.0" },
-                { "com.dandydino.modulate",    "https://github.com/AlbertoVosgerau/Modulate.git#0.4.2" },
-            };
         
+        private static readonly Dictionary<string, string> RemainingDependencies = new Dictionary<string, string>
+        {
+            { "com.gustavopsantos.reflex", "https://github.com/gustavopsantos/reflex.git?path=/Assets/Reflex/#14.3.0" },
+            { "com.dandydino.elements",    "https://github.com/AlbertoVosgerau/DDElements.git#0.2.0" },
+            { "com.cysharp.unitask",       "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.10" },
+            { "com.cysharp.r3",            "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity#1.3.0" },
+            { "com.dandydino.modulate",    "https://github.com/AlbertoVosgerau/Modulate.git#0.4.2" },
+        };
+        
+        public static bool IsModulateInstalled()
+        {
+            JObject manifest = LoadManifest();
+            if (manifest == null) return false;
+            if (manifest["dependencies"] is not JObject deps) return false;
+            return deps[ModulatePackageName] != null;
+        }
 
         public static bool IsNuGetForUnityInManifest()
         {
@@ -43,7 +49,7 @@ namespace DandyDino.Modulate.Bootstrap
 
         public static bool IsNuGetForUnityLoaded()
         {
-            return System.AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name.Equals("NuGetForUnity", System.StringComparison.OrdinalIgnoreCase));
+            return AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name.Equals("NuGetForUnity", System.StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool IsR3NuGetInstalled()
@@ -55,8 +61,15 @@ namespace DandyDino.Modulate.Bootstrap
         public static bool AreRemainingDependenciesInstalled()
         {
             JObject manifest = LoadManifest();
-            if (manifest == null) return false;
-            if (manifest["dependencies"] is not JObject deps) return false;
+            if (manifest == null)
+            {
+                return false;
+            }
+            if (manifest["dependencies"] is not JObject deps)
+            {
+                return false;
+            }
+            
             return RemainingDependencies.Keys.All(k => deps[k] != null);
         }
 
@@ -82,11 +95,12 @@ namespace DandyDino.Modulate.Bootstrap
                 deps[NuGetForUnityKey] = NuGetForUnityUrl;
                 SaveManifest(manifest);
                 Debug.Log($"{LogPrefix} Added NuGetForUnity. Resolving…");
+                ModulateDependencyInstallerEditorWindow.Close();
                 Client.Resolve();
             }
-            catch (System.Exception ex)
+            catch (Exception e)
             {
-                Debug.LogError($"{LogPrefix} Failed to install NuGetForUnity: {ex}");
+                Debug.LogError($"{LogPrefix} Failed to install NuGetForUnity: {e}");
             }
         }
 
@@ -157,9 +171,9 @@ namespace DandyDino.Modulate.Bootstrap
                 UninstallSelf();
                 Client.Resolve();
             }
-            catch (System.Exception ex)
+            catch (System.Exception e)
             {
-                Debug.LogError($"{LogPrefix} Failed to install remaining dependencies: {ex}");
+                Debug.LogError($"{LogPrefix} Failed to install remaining dependencies: {e}");
             }
         }
         
@@ -182,9 +196,9 @@ namespace DandyDino.Modulate.Bootstrap
                 // unload this very assembly — anything after this call may not run.
                 Client.Remove(SelfPackageName);
             }
-            catch (System.Exception ex)
+            catch (System.Exception e)
             {
-                Debug.LogError($"{LogPrefix} Failed to uninstall self: {ex}");
+                Debug.LogError($"{LogPrefix} Failed to uninstall self: {e}");
             }
         }
 
@@ -206,8 +220,7 @@ namespace DandyDino.Modulate.Bootstrap
             File.WriteAllText(GetManifestPath(), manifest.ToString(Formatting.Indented));
         }
 
-        private static string GetManifestPath()
-            => Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Packages", "manifest.json"));
+        private static string GetManifestPath() => Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Packages", "manifest.json"));
 
         private static bool TryInstallNuGetPackage(string packageId, string version)
         {
@@ -215,8 +228,11 @@ namespace DandyDino.Modulate.Bootstrap
             {
                 Assembly asm = System.AppDomain.CurrentDomain.GetAssemblies()
                     .FirstOrDefault(a => a.GetName().Name.Equals("NuGetForUnity", System.StringComparison.OrdinalIgnoreCase));
-                
-                if (asm == null) return false;
+
+                if (asm == null)
+                {
+                    return false;
+                }
 
                 Type installerType = asm.GetType("NugetForUnity.NugetPackageInstaller") ?? asm.GetType("NugetForUnity.NugetHelper");
                 Type identifierType = asm.GetType("NugetForUnity.Models.NugetPackageIdentifier") ?? asm.GetType("NugetForUnity.NugetPackageIdentifier");
@@ -233,7 +249,10 @@ namespace DandyDino.Modulate.Bootstrap
                     .FirstOrDefault(m => m.Name == "InstallIdentifier"
                                          && m.GetParameters().Length >= 1
                                          && m.GetParameters()[0].ParameterType.IsAssignableFrom(identifierType));
-                if (installMethod == null) return false;
+                if (installMethod == null)
+                {
+                    return false;
+                }
 
                 ParameterInfo[] parameters = installMethod.GetParameters();
                 object[] args = new object[parameters.Length];
@@ -250,11 +269,13 @@ namespace DandyDino.Modulate.Bootstrap
 
                 Debug.Log($"{LogPrefix} Installing NuGet package: {packageId} {version}");
                 installMethod.Invoke(null, args);
+                
                 return true;
             }
-            catch (System.Exception ex)
+            catch (Exception e)
             {
-                Debug.LogError($"{LogPrefix} Failed to install NuGet package {packageId}: {ex}");
+                Debug.LogError($"{LogPrefix} Failed to install NuGet package {packageId}: {e}");
+                
                 return false;
             }
         }
